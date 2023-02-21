@@ -1,24 +1,79 @@
+; ****************************************************************************************************************************
+; Program name: "Append Float Array".                                                                                        *
+; This program will allow a user to input two float arrays and append them into one large array.                             *
+; Copyright (C) 2023 Leo Hyodo.                                                                                              *
+;                                                                                                                            *
+; This file is part of the software program "Append Float Array".                                                            *
+; This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License  *
+; version 3 as published by the Free Software Foundation.                                                                    *
+; This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied         *
+; warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.     *
+; A copy of the GNU General Public License v3 is available here:  <https:;www.gnu.org/licenses/>.                            *
+; ****************************************************************************************************************************
+
+
+
+
+; ========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+
+; Author information
+;  Author name: Leo Hyodo
+;  Author email: lhyodo@csu.fullerton.edu
+
+; Program information
+;  Program name: Append Float Array
+;  Programming languages: Assembly, C, bash
+;  Date program began: 2023 Feb 6
+;  Date of last update: 2023 Feb 20
+;  Date of reorganization of comments: 2023 Feb 20
+;  Files in this program: manager.asm, main.c, display_array.c, magnitude.asm, input_array.asm, append.asm, run.sh
+;  Status: Finished.  The program was tested extensively with no errors in WSL 2.0.
+
+; This file
+;   File name: manager.asm
+;   Language: X86 with Intel syntax.
+;   Max page width: 133 columns
+;   Assemble: Assemble: nasm -f elf64 -l manager.lis -o manager.o manager.asm
+;   Link: gcc -m64 -no-pie -o addFloatArray.out manager.o input_array.o append.o main.o magnitude.o display_array.o -std=c11
+;   Purpose: This is the central module that will direct calls to different functions including input_array, display_array,
+;            magnitude, and append Using those functions, the magnitude of all the elements in a user created array will be 
+;            calculated and be returned to the caller of this function (in main.c).
+          
+; ========================================================================================================
 extern printf
 extern scanf
+extern input_array
+extern display_array
+extern magnitude
+extern stdin
+extern clearerr
+extern append
+
 global manager
 
 segment .data
-brief db "This program will sum your array of 64-bit floats.",10,0
-prompt db "Enter a sequence of 64-bit floats separated by white space.", 10, 0
-prompt2 db "After the last input press enter followed by Control+D:",10,0
-side_one db "%lf", 0
-side_two db "%lf", 0
+brief db "This program will manage your arrays of 64-bit floats", 10, 0
+prompt_a db "For array A enter a sequence of 64-bit floats separated by white space.", 10, 0
+prompt_b db "For array A enter a sequence of 64-bit floats separated by white space.", 10, 0
+prompt_end db "After the last input press enter followed by Control+D: ", 10, 0
+present_numbers_a db "These numbers were received and placed into array A", 10, 0
+present_numbers_b db "These numbers were received and placed into array B", 10, 0
+magnitude_message_a db "The magnitude of array A is %.5lf.", 10, 0
+magnitude_message_b db "The magnitude of array B is %.5lf.", 10, 0
+magnitude_message_result db "The magnitude of A⊕ B is %.5lf.", 10, 0
+append_message db "Arrays A and B have been appended and given the name A⊕ B", 10, 0
+append_message_two db "A⊕ B contains", 10, 0
 
-one_float_format db "%lf",0
-three_float_format db "%lf %lf %lf", 0
 
-four dq 4.0
+segment .bss  ;Reserved for uninitialized data
+array_one resq 6 ;Array of 6 quad words reserved before run time.
+array_two resq 6 
+result_array resq 12
 
-segment .bss
 
-segment .text
+segment .text ;Reserved for executing instructions.
 
-manager: ; RENAME THIS TO THE NAME OF YOUR MODULE/FUNCTION THAT YOU ARE WRITING
+manager:
 
 ;Prolog ===== Insurance for any caller of this assembly module ========================================================
 ;Any future program calling this module that the data in the caller's GPRs will not be modified.
@@ -39,40 +94,187 @@ push r15                                                    ;Backup r15
 push rbx                                                    ;Backup rbx
 pushf                                                       ;Backup rflags
 
-; WRITE YOUR CODE HERE!!!!!
+push qword 0  ;Remain on the boundary
 
-
+;"This program will manage your arrays of 64-bit floats"
+push qword 0
 mov rax, 0
 mov rdi, brief
 call printf
-
-mov rax, 0
-mov rdi, prompt
-call printf
-
-mov rax, 0
-mov rdi, prompt2
-call printf
-
-push qword 0
-push qword 0
-mov qword rax, 0
-mov rdi, side_one
-mov rsi, rsp
-call scanf
-pop r15
 pop rax
 
+;"For array A enter a sequence of 64-bit floats separated by white space."
 push qword 0
+mov rax, 0
+mov rdi, prompt_a
+call printf
+pop rax
+
+;"After the last input press enter followed by Control+D: "
 push qword 0
-mov qword rax, 0
-mov rdi, side_two
-mov rsi, rsp
-call scanf
-pop r15
+mov rax, 0
+mov rdi, prompt_end
+call printf
+pop rax
+
+;Call to input_array function which takes two parameters of array and maxarraysize, and returns actualarraysize
+;The input_array function calls scanf to take an input of floats, and terminates on ctrl-d.
+;This function takes a parameter of first array
+push qword 0
+mov rax, 0
+mov rdi, array_one ;Array passed in as first param
+mov rsi, 6         ;Array size passed in as second param
+call input_array
+mov r15, rax
+pop rax
+
+;"The numbers you entered are these: "
+push qword 0
+mov rax, 0
+mov rdi, present_numbers_a
+call printf
+pop rax
+
+;Call to display_array module which prints first array
+push qword 0
+mov rax, 0
+mov rdi, array_one
+mov rsi, r15
+call display_array
+pop rax
+
+;Call to magnitude module for first array, storing magnitude in xmm14
+;magnitude = sqrt(a^2 + b^2 + c^2 + d ^2 + ...)
+push qword 0
+mov rax, 0
+mov rdi, array_one
+mov rsi, 6
+call magnitude
+movsd xmm14, xmm0
+pop rax
+
+;"The magnitude of array A is %.10lf."
+push qword 0
+mov rax, 1
+mov rdi, magnitude_message_a
+movsd xmm0, xmm14
+call printf
+pop rax
+
+;Clears failbit which is necessary in between input_array calls
+mov rax, 0
+mov rdi, [stdin]
+call clearerr
+
+
+
+;Call to input_array function which takes two parameters of array and maxarraysize, and returns actualarraysize
+;The input_array function calls scanf to take an input of floats, and terminates on ctrl-d.
+;This function takes a parameter of second array
+push qword 0
+mov rax, 0
+mov rdi, array_two ; array passed in as first param
+mov rsi, 6         ; array size passed in as second param
+call input_array
+mov r14, rax
+pop rax
+
+;"The numbers you entered are these: "
+push qword 0
+mov rax, 0
+mov rdi, present_numbers_b
+call printf
+pop rax
+
+;Call to display_array module which prints second array
+push qword 0
+mov rax, 0
+mov rdi, array_two
+mov rsi, r14
+call display_array
 pop rax
 
 
+
+;Call to magnitude module for second array, storing magnitude in xmm13
+;Magnitude = sqrt(a^2 + b^2 + c^2 + d ^2 + ...)
+push qword 0
+mov rax, 0
+mov rdi, array_two
+mov rsi, 6
+call magnitude
+movsd xmm13, xmm0
+pop rax
+
+
+;"The magnitude of array B is %.10lf."
+push qword 0
+mov rax, 1
+mov rdi, magnitude_message_b
+movsd xmm0, xmm13
+call printf
+pop rax
+
+;Call to append module which appends the second array to the first array, and stores it in a result array
+push qword 0
+mov rax, 0
+mov rdi, array_one
+mov rsi, array_two
+mov rdx, result_array
+mov rcx, r15
+mov r8, r14
+call append
+pop rax
+
+;"Arrays A and B have been appended and given the name A⊕ B"
+push qword 0
+mov rax, 0
+mov rdi, append_message
+call printf
+pop rax
+
+;"A⊕ B contains"
+push qword 0
+mov rax, 0
+mov rdi, append_message_two
+call printf
+pop rax
+
+;Take the sum of first and second array sizes and stores it r13 for future use
+mov rax, 0
+mov r13, r15
+add r13, r14
+
+;Call to display_array module which prints the new appended array of first and second array
+push qword 0
+mov rax, 0
+mov rdi, result_array
+mov rsi, r13
+call display_array
+pop rax
+
+;Call to magnitude module for the result array, storing magnitude in xmm13
+;Magnitude = sqrt(a^2 + b^2 + c^2 + d ^2 + ...)
+push qword 0
+mov rax, 0
+mov rdi, result_array
+mov rsi, r13
+call magnitude
+movsd xmm12, xmm0
+pop rax
+
+;"The magnitude of A⊕ B is %.10lf."
+push qword 0
+mov rax, 1
+mov rdi, magnitude_message_result
+movsd xmm0, xmm12
+call printf
+pop rax
+
+
+;End of the program
+pop rax ;Counter the push at the beginning
+movsd xmm0, xmm12 ;Return the magnitude of the result array to the caller module
 
 ;===== Restore original values to integer registers ===================================================================
 popf                                                        ;Restore rflags
@@ -92,3 +294,5 @@ pop rdi                                                     ;Restore rdi
 pop rbp                                                     ;Restore rbp
 
 ret
+
+;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
