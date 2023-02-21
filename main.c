@@ -1,62 +1,59 @@
-//****************************************************************************************************************************
-//Program name: "Rectangle".  This program takes in the user input of height and width in float and calculates perimeter and
-//average side length. Copyright (C) 2021 Johnson Tong.                                                                             *
-//                                                                                                                           *
-//This file is part of the software program "Rectangle".                                                                   *
-//Rectangle is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License   *
-//version 3 as published by the Free Software Foundation.                                                                    *
-//Rectangle is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied          *
-//warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.     *
-//A copy of the GNU General Public License v3 is available here:  <https:;www.gnu.org/licenses/>.                            *
-//****************************************************************************************************************************
+// ****************************************************************************************************************************
+// Program name: "Append Float Array".                                                                                        *
+// This program will allow a user to input two float arrays and append them into one large array.                             *
+// Copyright (C) 2023 Leo Hyodo.                                                                                              *
+//                                                                                                                            *
+// This file is part of the software program "Append Float Array".                                                            *
+// This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License  *
+// version 3 as published by the Free Software Foundation.                                                                    *
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied         *
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.     *
+// A copy of the GNU General Public License v3 is available here:  <https:;www.gnu.org/licenses/>.                            *
+// ****************************************************************************************************************************
 
-//=======1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
-//
-//Author information
-//  Author name: Johnson Tong
-//  Author email: tong.johnson.28@gmail.com
-//
-//Program information
-//  Program name: Johnson Tong
-//  Programming languages: One modules in C and one module in X86
-//  Date program began: 2021 Feb 05
-//  Date of last update: 2021 Feb 12
-//  Files in this program: rectangle.c, perimeter.asm
-//  Status: Finished.
-//
-//Purpose
-//  Show how to input and output floating point (64-bit) numbers.
-//
-//This file
-//   File name: rectangle.c
+
+
+
+// ========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+
+// Author information
+//  Author name: Leo Hyodo
+//  Author email: lhyodo@csu.fullerton.edu
+
+// Program information
+//  Program name: Append Float Array
+//  Programming languages: Assembly, C, bash
+//  Date program began: 2023 Feb 6
+//  Date of last update: 2023 Feb 20
+//  Date of reorganization of comments: 2023 Feb 20
+//  Files in this program: manager.asm, main.c, display_array.c, magnitude.asm, input_array.asm, append.asm, run.sh
+//  Status: Finished.  The program was tested extensively with no errors in WSL 2.0.
+
+// This file
+//   File name: main.c
 //   Language: C
-//   Max page width: 132 columns
-//   Compile: gcc -c -Wall -m64 -no-pie -o manage-floats.o manage-floats.c -std=c17
-//   Link: gcc -m64 -no-pie -o three-numbers.out manage-floats.o float-input-output.o -std=c17
-//   Optimal print specification: 132 columns width, 7 points, monospace, 8½x11 paper
-//
-//=======1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
-//
-//
-//===== Begin code area ===========================================================================================================
-
+//   Max page width: 134 columns
+//   Compile: gcc -c -Wall -m64 -no-pie -o main.o main.c -std=c11
+//   Link: gcc -m64 -no-pie -o addFloatArray.out manager.o input_array.o append.o main.o magnitude.o display_array.o -std=c11
+//   Purpose: This is the central module that will direct calls to different functions including input_array, display_array,
+//            magnitude, and append Using those functions, the magnitude of all the elements in a user created array will be 
+//            calculated and be returned to the caller of this function (in main.c).
+          
+// ========================================================================================================
 #include <stdio.h>
 #include <stdint.h>
 #include <time.h>
 #include <sys/time.h>
 #include <stdlib.h>
 
-extern double manager();
+extern double manager();  //Assembly module that will direct calls to other functions
+                          //that will fill an array and computer its magnitude
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-  //double p = 0.0;
-  //p = perimeter();
-  printf("Welcome to Arrays of Integers\nBrought to you by  Leo Hyodo\n");
-  double foo = manager();
-
-
-  printf("Main has received %.12f\n, and will keep it for future use.", foo);
-  printf("Main will return 0 to the operating system. Good bye");
-  return 0;
+  printf("Welcome to Arrays of floats\n");
+  printf("Brought to you by Leo Hyodo\n");
+  double answer = manager();  //The control module will return the magnitude of the array contents
+  printf("Main received %.10lf and will keep it for future use.\n", answer);
+  printf("Main will return 0 to the operating system. Good bye\n");
 }
