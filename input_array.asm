@@ -24,8 +24,8 @@
 ;  Program name: Append Float Array
 ;  Programming languages: Assembly, C, bash
 ;  Date program began: 2023 Feb 6
-;  Date of last update: 2023 Feb 20
-;  Date of reorganization of comments: 2023 Feb 20
+;  Date of last update: 2023 Feb 21
+;  Date of reorganization of comments: 2023 Feb 21
 ;  Files in this program: manager.asm, main.c, display_array.c, magnitude.asm, input_array.asm, append.asm, run.sh
 ;  Status: Finished.  The program was tested extensively with no errors in WSL 2.0.
 
@@ -76,35 +76,37 @@ push r15                                                    ;Backup r15
 push rbx                                                    ;Backup rbx
 pushf                                                       ;Backup rflags
 
-push qword 0  ;Staying on the boundary
+push qword 0                 ;Staying on the 8 byte boundary
 
 ;Copy the passed parameters into memory to use
-mov r15, rdi  ;r15 holds the array that was passed from parameter list
-mov r14, rsi  ;r14 holds the array size
+mov r15, rdi                 ;r15 holds the first parameter (the array)
+mov r14, rsi                 ;r14 holds the second parameter (the size of the array)
 
 
-mov r13, 0  ;r13 is a loop counter
+mov r13, 0                   ;Let r13 be the loop counter, starting at 0
 beginLoop:
-  cmp r14, r13  ;Exit loop when loop counter is equal to array size
-  je outOfLoop
-  mov rax, 0
-  mov rdi, float_format
-  push qword 0
-  mov rsi, rsp
-  call scanf
-  cdqe
-  cmp rax, -1  ;Exit loop when user hits ctrl-d
-  pop r12
-  je outOfLoop
+cmp r14, r13                 ;Compare the loop counter to the size of the array
+je outOfLoop                 ;Exit loop when loop counter is equal to size of the array
+
+mov rax, 0                   ;Zero floating point numbers involved in calling scanf
+mov rdi, float_format        ;Pass in the format that we are scanning for
+push qword 0                 ;Reserve 8 bytes of memory for scanf
+mov rsi, rsp                 ;Pass in the pointer to the top of the stack, where the input will reside
+call scanf                   ;Calls the scanf function, which places its input into rsp
+pop r12                      ;Places the value from the top of the stack (rsp) into r12
+
+cdqe                         ;Extends the lower half of rax to all 64 bits
+cmp rax, -1                  ;Compares rax to -1 which is the value when user hits ctrl-d
+je outOfLoop                 ;If rax is equal to -1, jump to outOfLoop
   
 
-  mov [r15 + 8*r13], r12  ;Place number from scanf into r15 address, and shift 8 bits each for each loop
-  inc r13  ;Increment loop counter
-  jmp beginLoop
+mov [r15 + 8*r13], r12       ;Place number from scanf into r15 address, and shift 8 bits each for each loop using loop counter
+inc r13                      ;Increment loop counter by 1
+jmp beginLoop
 
 outOfLoop:
-pop rax  ;Counter the push at the beginning
-mov rax, r13  ;Return the actual size of the array (loop counter) to caller module
+pop rax                      ;Counter the push at the beginning
+mov rax, r13                 ;Return the size of the array (loop counter) to caller module
 
 ;===== Restore original values to integer registers ===================================================================
 popf                                                        ;Restore rflags
