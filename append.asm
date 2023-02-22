@@ -24,8 +24,8 @@
 ;  Program name: Append Float Array
 ;  Programming languages: Assembly, C, bash
 ;  Date program began: 2023 Feb 6
-;  Date of last update: 2023 Feb 20
-;  Date of reorganization of comments: 2023 Feb 20
+;  Date of last update: 2023 Feb 21
+;  Date of reorganization of comments: 2023 Feb 21
 ;  Files in this program: manager.asm, main.c, display_array.c, magnitude.asm, input_array.asm, append.asm, run.sh
 ;  Status: Finished.  The program was tested extensively with no errors in WSL 2.0.
 
@@ -72,44 +72,51 @@ push rbx                                                    ;Backup rbx
 pushf                                                       ;Backup rflags
 
 ; WRITE YOUR CODE HERE!!!!!
-push qword 0 ;Staying on the boundary
 
-mov r15, rdi ;Take arr1 from the parameters
-mov r14, rsi ;arr2
-mov r13, rdx ;result_arr
-mov r12, rcx ;arr1_size
-mov r11, r8  ;arr2_size
+push qword 0                    ;Staying on the 8 byte boundary
 
-
-
-;Let user enter numbers until cntrl + d is entered
-;This for loop will go to 6, the chosen array size, or end once cntrl d is pressed.
-mov r10, 0 ;Loop counter for first and second array
-mov r9, 0 ; Loop counter for second array
-beginLoop:
-  cmp r12, r10 ;We want to exit loop when we hit the size of array (first array)
-  je outOfLoop
-
-  movsd xmm15, [r15 + 8*r10]
-  movsd [r13 + 8*r10], xmm15
-  inc r10  ;Increment loop counter
-  jmp beginLoop
+;Taking information from the parameters
+mov r15, rdi                    ;r15 holds the first parameter (array_A)
+mov r14, rsi                    ;r14 holds the second parameter (array_B)
+mov r13, rdx                    ;r13 holds the third parameter (result_array)
+mov r12, rcx                    ;r12 holds the fourth parameter (the size of array_A)
+mov r11, r8                     ;r11 holds the fifth parameter (the size of array_B)
 
 
-outOfLoop:
-  cmp r11, r9 ;We want to exit loop when we hit the size of array (second array)
+;The result array will contain array_B appended to array_A.
+
+;Since the index of array_A elements are the same in array_A and resultarray, 
+;we can use the same loop counter for both.
+
+
+mov r10, 0                      ;r10 is a loop counter that holds the index of result_array
+mov r9, 0                       ;r9 is a loop counter that holds the index of array_B
+
+;loopA will copy elements of array_A into result_array
+loopA:                          
+  cmp r12, r10                  ;We want to exit loop when we hit the size of array_A
+  je loopB                  
+
+  movsd xmm15, [r15 + 8*r10]    ;Copies the current element of array_A into xmm15
+  movsd [r13 + 8*r10], xmm15    ;Copies xmm15 into the result_array
+  inc r10                       ;Increment loop counter
+  jmp loopA
+
+;loopB will copy elements of array_B into result_array
+loopB:
+  cmp r11, r9                   ;We want to exit loop when we hit the size of array_B
   je endFunction
 
-  movsd xmm15, [r14 + 8*r9]
-  movsd [r13 + 8*r10], xmm15
-  inc r9   ;Increment loop counter for second array
-  inc r10  ;Increment loop counter for both arrays
-  jmp outOfLoop
+  movsd xmm15, [r14 + 8*r9]     ;Copies the current element of array_B into xmm15
+  movsd [r13 + 8*r10], xmm15    ;Copies xmm15 into the result_array
+  inc r9                        ;Increment loop counter for the index of array_B
+  inc r10                       ;Increment loop counter for the index of result_array
+  jmp loopB
 
 
 endFunction:
-pop rax ;Counter the push at the beginning
-mov rax, r10  ;Store the number of elements in the result array (loop counter for both arrays)
+pop rax                         ;Counter the push at the beginning
+mov rax, r10                    ;Return the size of result_array (loop counter for result_array)
 
 
 
