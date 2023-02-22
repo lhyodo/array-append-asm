@@ -25,14 +25,14 @@ nasm -f elf64 -l append.lis -o append.o append.asm
 echo "compile display_array.c using the gcc compiler standard 2011"
 gcc -c -Wall -no-pie -m64 -std=c11 -o display_array.o display_array.c
 
-echo "compile main.c using gcc compiler standard 2011"
-gcc -c -Wall -m64 -no-pie -o main.o main.c -std=c11
+echo "compile main.c using gcc compiler standard 2017"
+gcc -c -Wall -m64 -no-pie -o main.o main.c -std=c17
 
-echo "Link object files using the gcc Linker standard 2011"
-gcc -m64 -no-pie -o addFloatArray.out manager.o input_array.o append.o main.o magnitude.o display_array.o -std=c11
+echo "Link object files using the gcc Linker standard 2017"
+gcc -m64 -no-pie -o array-magnitude.out manager.o input_array.o append.o main.o magnitude.o display_array.o -std=c17
 
 echo "Run the Append Array Program:"
-./addFloatArray.out
+./array-magnitude.out
 
 echo "Script file has terminated."
 
