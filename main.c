@@ -24,8 +24,8 @@
 //  Program name: Append Float Array
 //  Programming languages: Assembly, C, bash
 //  Date program began: 2023 Feb 6
-//  Date of last update: 2023 Feb 20
-//  Date of reorganization of comments: 2023 Feb 20
+//  Date of last update: 2023 Feb 21
+//  Date of reorganization of comments: 2023 Feb 21
 //  Files in this program: manager.asm, main.c, display_array.c, magnitude.asm, input_array.asm, append.asm, run.sh
 //  Status: Finished.  The program was tested extensively with no errors in WSL 2.0.
 
@@ -46,14 +46,16 @@
 #include <sys/time.h>
 #include <stdlib.h>
 
-extern double manager();  //Assembly module that will direct calls to other functions
-                          //that will fill an array and computer its magnitude
+extern double manager();      
+// manager is an assembly module that will direct calls to other 
+// functions that will fill two arrays, append them, and compute and return its magnitude
+
 
 int main(int argc, char *argv[])
 {
   printf("Welcome to Arrays of floats\n");
   printf("Brought to you by Leo Hyodo\n");
-  double answer = manager();  //The control module will return the magnitude of the array contents
+  double answer = manager();   // The manager module will return the magnitude of the array contents
   printf("Main received %.10lf and will keep it for future use.\n", answer);
   printf("Main will return 0 to the operating system. Good bye\n");
 }
