@@ -24,8 +24,8 @@
 ;  Program name: Append Float Array
 ;  Programming languages: Assembly, C, bash
 ;  Date program began: 2023 Feb 6
-;  Date of last update: 2023 Feb 20
-;  Date of reorganization of comments: 2023 Feb 20
+;  Date of last update: 2023 Feb 21
+;  Date of reorganization of comments: 2023 Feb 21
 ;  Files in this program: manager.asm, main.c, display_array.c, magnitude.asm, input_array.asm, append.asm, run.sh
 ;  Status: Finished.  The program was tested extensively with no errors in WSL 2.0.
 
